@@ -79,6 +79,11 @@ def _find_qos_specs(cs, qos_specs):
     return utils.find_resource(cs.qos_specs, qos_specs)
 
 
+def _find_replication_relationship(cs, relationship):
+    """Get a replication relationship by ID."""
+    return utils.find_resource(cs.relationships, relationship)
+
+
 def _print_volume_snapshot(snapshot):
     utils.print_dict(snapshot._info)
 
@@ -1453,3 +1458,44 @@ def do_readonly_mode_update(cs, args):
     volume = utils.find_volume(cs, args.volume)
     cs.volumes.update_readonly_flag(volume,
                                     strutils.bool_from_string(args.read_only))
+
+
+@utils.arg('relationship', metavar='<relationship>',
+           help='ID of the relationship.')
+@utils.service_type('volumev2')
+def do_replication_show(cs, args):
+    """Show details about a replication relationship."""
+    rel = _find_replication_relationship(cs, args.relationship)
+    info = dict()
+    info.update(rel._info)
+    info.pop('links', None)
+    utils.print_dict(info)
+
+
+@utils.arg('--primary',
+           metavar='<primary>',
+           default=None,
+           help='Filter results by primary volume')
+@utils.arg('--secondary',
+           metavar='<secondary>',
+           default=None,
+           help='Filter results by secondary volume')
+@utils.arg('--status',
+           metavar='<status>',
+           default=None,
+           help='Filter results by status volume')
+@utils.service_type('volumev2')
+def do_replication_list(cs, args):
+    """List all the replication relationships."""
+    search_opts = {}
+    if args.primary is not None:
+        volume = utils.find_volume(cs, args.primary)
+        search_opts['primary_id'] = volume.id
+    if args.secondary is not None:
+        volume = utils.find_volume(cs, args.secondary)
+        search_opts['secondary_id'] = volume.id
+    if args.status is not None:
+        search_opts['status'] = args.status
+    relationships = cs.relationships.list(search_opts=search_opts)
+    utils.print_list(relationships, ['ID', 'Primary ID', 'Secondary ID',
+                                     'Status'])

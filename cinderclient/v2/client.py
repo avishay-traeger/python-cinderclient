@@ -27,6 +27,7 @@ from cinderclient.v2 import volume_encryption_types
 from cinderclient.v2 import volume_backups
 from cinderclient.v2 import volume_backups_restore
 from cinderclient.v1 import volume_transfers
+from cinderclient.v2 import volume_replication
 
 
 class Client(object):
@@ -67,6 +68,7 @@ class Client(object):
         self.backups = volume_backups.VolumeBackupManager(self)
         self.restores = volume_backups_restore.VolumeBackupRestoreManager(self)
         self.transfers = volume_transfers.VolumeTransferManager(self)
+        self.relationships = volume_replication.VolumeReplicationManager(self)
         self.services = services.ServiceManager(self)
         self.availability_zones = \
             availability_zones.AvailabilityZoneManager(self)
