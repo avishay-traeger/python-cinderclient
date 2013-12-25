@@ -781,3 +781,22 @@ class FakeHTTPClient(base_client.HTTPClient):
 
     def put_snapshots_1234_metadata(self, **kw):
         return (200, {}, {"metadata": {"key1": "val1", "key2": "val2"}})
+
+    def get_os_volume_replication_detail(self, **kw):
+        return (200, {}, {"relationships": [
+            {'id': '1234',
+             'primary_id': '1111',
+             'secondary_id': '2222',
+             'status': 'active'},
+            {'id': '5678',
+             'primary_id': '3333',
+             'secondary_id': '4444',
+             'status': 'error'},
+        ]})
+
+    def get_os_volume_replication_1234(self, **kw):
+        r = self.get_os_volume_replication_detail()[2]['relationships'][0]
+        return (200, {}, {'relationship': r})
+
+    def put_os_volume_replication_1234(self, **kw):
+        return (202, {}, {})

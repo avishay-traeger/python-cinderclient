@@ -313,3 +313,30 @@ class ShellTest(utils.TestCase):
         self.run_command('readonly-mode-update 1234 False')
         expected = {'os-update_readonly_flag': {'readonly': False}}
         self.assert_called('POST', '/volumes/1234/action', body=expected)
+
+    def test_replication_show(self):
+        self.run_command('replication-show 1234')
+        self.assert_called('GET', '/os-volume-replication/1234')
+
+    def test_replication_list(self):
+        self.run_command('replication-list')
+        self.assert_called('GET', '/os-volume-replication/detail')
+
+    def test_replication_list_filter_primary(self):
+        self.run_command('replication-list --primary=1234')
+        self.assert_called('GET',
+                           '/os-volume-replication/detail?primary_id=1234')
+
+    def test_replication_list_filter_secondary(self):
+        self.run_command('replication-list --secondary=1234')
+        self.assert_called('GET',
+                           '/os-volume-replication/detail?secondary_id=1234')
+
+    def test_replication_list_filter_status(self):
+        self.run_command('replication-list --status=error')
+        self.assert_called('GET', '/os-volume-replication/detail?status=error')
+
+    def test_replication_swap(self):
+        self.run_command('replication-swap 1234')
+        expected = {'relationship': {'swap': None}}
+        self.assert_called('PUT', '/os-volume-replication/1234', expected)
