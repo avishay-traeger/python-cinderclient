@@ -17,17 +17,21 @@ Volume replication interface.
 """
 
 import six
+try:
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlencode
 
 from cinderclient import base
 
 
 class VolumeReplication(base.Resource):
     def __repr__(self):
-        return "<VolumeReplication: %s>" % self.id
+        return '<VolumeReplication: %s>' % self.id
 
-#    def swap(self):
-#        """Swap roles in this replication relationshp."""
-#        return self.manager.delete(self)
+    def swap(self):
+        """Swap roles in this replication relationshp."""
+        return self.manager.swap(self)
 
 
 class VolumeReplicationManager(base.ManagerWithFind):
@@ -40,8 +44,8 @@ class VolumeReplicationManager(base.ManagerWithFind):
         :param relationship_id: ID of the replication relationship to display.
         :rtype: :class:`VolumeReplication`
         """
-        return self._get("/os-volume-replication/%s" % relationship_id,
-                         "relationship")
+        return self._get('/os-volume-replication/%s' % relationship_id,
+                         'relationship')
 
     def list(self, detailed=True, search_opts=None):
         """Get a list of all replication relationships.
@@ -57,26 +61,20 @@ class VolumeReplicationManager(base.ManagerWithFind):
             if val:
                 qparams[opt] = val
 
-        query_string = "?%s" % urlencode(qparams) if qparams else ""
+        query_string = '?%s' % urlencode(qparams) if qparams else ''
 
-        detail = ""
+        detail = ''
         if detailed:
-            detail = "/detail"
+            detail = '/detail'
 
-        return self._list("/os-volume-replication%s%s" % (detail, query_string),
-                          "relationships")
+        return self._list('/os-volume-replication%s%s' % (detail, query_string),
+                          'relationships')
 
-    def _action(self, action, volume, info=None, **kwargs):
-        """Perform a replication "action."
+    def swap(self, relationship):
+        """Swap roles in this replication relationshp.
+
+        :param relationship: The :class:`VolumeReplication` to swap.
         """
-        body = {action: info}
-        self.run_hooks('modify_body_for_action', body, **kwargs)
-        url = '/os-volume-replication/%s/action' % base.getid(volume)
-        return self.api.client.post(url, body=body)
-
-#    def swap(self, relationship_id):
-#        """Swap roles in this replication relationshp.
-#
-#        :param relationship_id: The :class:`VolumeReplication` to swap.
-#        """
-#        self._action('os-swap' % base.getid(relationship_id))
+        body = {'relationship': {'swap': None}}
+        rel_id = base.getid(relationship)
+        self._update('/os-volume-replication/%s' % rel_id, body)

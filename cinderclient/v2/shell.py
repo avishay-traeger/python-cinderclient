@@ -1499,3 +1499,12 @@ def do_replication_list(cs, args):
     relationships = cs.relationships.list(search_opts=search_opts)
     utils.print_list(relationships, ['ID', 'Primary ID', 'Secondary ID',
                                      'Status'])
+
+
+@utils.arg('relationship', metavar='<relationship>',
+           help='ID of the relationship.')
+@utils.service_type('volumev2')
+def do_replication_swap(cs, args):
+    """Show details about a replication relationship."""
+    rel = _find_replication_relationship(cs, args.relationship)
+    rel.swap()
